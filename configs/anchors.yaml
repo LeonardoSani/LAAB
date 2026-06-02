@@ -1,0 +1,4 @@
+N: 256                      # number of anchors, must equal latent_dim
+sampling_seed: 42           # seed for X_a sampling
+attractor_tol: 1.0e-6       # convergence threshold ||z_{t+1} - z_t||^2
+attractor_max_iter: 3000

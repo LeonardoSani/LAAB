@@ -1,0 +1,22 @@
+[project]
+name = "laab"
+version = "0.1.0"
+description = "How Autoencoder Dynamics Break Cross-Encoder Alignment"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "torch>=2.3.0",
+    "torchvision>=0.18.0",
+    "numpy>=1.26",
+    "scipy>=1.13",
+    "matplotlib>=3.9",
+    "pandas>=2.2",
+    "pyyaml>=6.0",
+    "tqdm>=4.66",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29",
+    "jupyter>=1.0",
+]

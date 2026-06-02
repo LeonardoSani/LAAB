@@ -1,0 +1,16 @@
+latent_dim: 256       # k = N (bottleneck dim = number of anchors)
+channel_base: 32      # d
+in_channels: 1        # MNIST
+img_size: 28          # MNIST
+
+optimizer: adam
+lr: 5.0e-4
+weight_decay: 1.0e-4
+epochs: 500
+batch_size: 128
+
+val_fraction: 0.1     # 6000 val samples from 60k train
+val_seed: 0
+early_stopping_patience: 50
+
+relative_decoder_init_seed: 42   
