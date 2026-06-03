@@ -3,5 +3,6 @@ from src.experiments.e1_mixed import E1Mixed
 from src.experiments.e2_anchors import E2Anchors
 from src.experiments.e3_stitching import E3Stitching
 from src.experiments.e4_full import E4Full
+from src.experiments.e5_basins import E5Basins
 
-__all__ = ["E0Baseline", "E1Mixed", "E2Anchors", "E3Stitching", "E4Full"]
+__all__ = ["E0Baseline", "E1Mixed", "E2Anchors", "E3Stitching", "E4Full", "E5Basins"]
