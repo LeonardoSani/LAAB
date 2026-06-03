@@ -32,12 +32,12 @@ def plot_mixed_curves(
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4))
 
-    for ax, metric, label in [(ax1, "M1", r"$D_{L^2}$ (M1)"), (ax2, "M2", r"$D_{\cos}$ (M2)")]:
+    for ax, metric, label in [(ax1, "M1", r"$M_1$ ($L^2$)"), (ax2, "M2", r"$M_2$ ($1-\cos$)")]:
         mean = df[f"{metric}_mean"].values
         (line,) = ax.plot(xs, mean, marker="o", markersize=3, label="mean")
         _quantile_bands(ax, xs, df, metric, line.get_color())
         ax.axhline(baseline[f"{metric}_mean"], color="gray", linestyle="--",
-                   linewidth=1, label="E0 baseline")
+                   linewidth=1, label=r"baseline ($t=0$)")
         _ordinal_axis(ax, t_vals)
         ax.set_xlabel("depth $t$")
         ax.set_ylabel(label)
@@ -69,8 +69,8 @@ def plot_full_vs_mixed(
 
     _ordinal_axis(ax, t_vals)
     ax.set_xlabel("depth $t$")
-    ax.set_ylabel(r"$D_{L^2}$ (M1)")
-    ax.set_title("Full vs Mixed — M1 (frame drift check)")
+    ax.set_ylabel(r"$M_1$ ($L^2$)")
+    ax.set_title(r"Full vs Mixed — $M_1$")
     ax.legend(fontsize=9)
     fig.tight_layout()
     save_path = Path(save_path)

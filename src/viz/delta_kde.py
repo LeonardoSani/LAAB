@@ -38,9 +38,9 @@ def plot_delta_kde_single(
         ax.axvline(mu, color="red", linestyle="--", label=f"mean={mu:.4f}")
         ax.legend(fontsize=9)
 
-    ax.set_xlabel(r"$\delta_i$")
+    ax.set_xlabel(r"$M_3$")
     ax.set_ylabel("log density" if log_scale else "density")
-    ax.set_title(r"$\Pi_\delta^0$ — Base representation ($t=0$)")
+    ax.set_title(r"Baseline ($t=0$) — per-anchor mismatch $M_3$")
     fig.tight_layout()
     save_path = Path(save_path)
     save_path.parent.mkdir(parents=True, exist_ok=True)
@@ -88,13 +88,13 @@ def plot_delta_kde_grid(
         ax.set_ylim(0, y_top)
         label = r"$t=\infty$" if t == float("inf") else f"$t={t}$"
         ax.set_title(label)
-        ax.set_xlabel(r"$\delta_i$")
+        ax.set_xlabel(r"$M_3$")
         ax.set_ylabel("density")
         ax.legend(fontsize=8)
 
     for ax in axes[n:]:
         ax.set_visible(False)
-    fig.suptitle(r"Per-anchor mismatch $\delta_i$ distribution (Mixed)")
+    fig.suptitle(r"Per-anchor mismatch $M_3$ distribution (Mixed)")
     fig.tight_layout()
     save_path = Path(save_path)
     save_path.parent.mkdir(parents=True, exist_ok=True)

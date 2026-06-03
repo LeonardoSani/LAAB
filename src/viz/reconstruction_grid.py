@@ -86,7 +86,7 @@ def plot_stitching_grid(
     Cols: orig | AE s=1 | D_r^t(M_2^t) for t in {0,8,64,512,inf}"""
     depth_order = [0, 8, 64, 512, float("inf")]
     depth_labels = ["t=0", "t=8", "t=64", "t=512", r"t=∞"]
-    col_labels = ["orig", "AE s=1"] + [f"D_r({lbl})\nM₂" for lbl in depth_labels]
+    col_labels = ["orig", "AE s=1"] + [f"D_r({lbl})\nMixed" for lbl in depth_labels]
 
     idxs = _pick_one_per_class(test_ds)
     imgs = torch.stack([test_ds[i][0] for i in idxs])  # (10,1,28,28)

@@ -22,6 +22,7 @@ from src.store.anchors import AnchorStore
 from src.store.checkpoints import CheckpointStore
 from src.utils.device import get_device
 from src.viz.anchor_consistency import plot_anchor_consistency
+from src.viz.basin_consistency import plot_basin_consistency
 from src.viz.class_tails import plot_class_tails
 from src.viz.delta_curve import plot_delta_curve
 from src.viz.delta_kde import plot_delta_kde_grid, plot_delta_kde_single
@@ -29,7 +30,7 @@ from src.viz.metric_curves import plot_full_vs_mixed, plot_mixed_curves
 from src.viz.reconstruction_grid import plot_reference_grid, plot_stitching_grid
 from src.viz.stitching_fig import plot_stitching
 
-DEFAULT_FIGS = "1,2,3,4,5,6,7,8,9,10"
+DEFAULT_FIGS = "1,2,3,4,5,6,7,8,9,10,11"
 
 
 class FigureMaker:
@@ -205,6 +206,15 @@ class FigureMaker:
             save_path=self.fig_dir / "fig10_recon_reference",
         )
         print("Fig 10 saved.")
+
+    # --- E5 ---
+    def fig11(self):
+        if not self._have("e5_basin_jaccard.npy"):
+            return print("Fig 11: e5_basin_jaccard.npy missing — skip")
+        J, J_null, _size, _mu = np.load(self.results / "e5_basin_jaccard.npy")
+        plot_basin_consistency(J, J_null,
+                               save_path=self.fig_dir / "fig11_basin_consistency")
+        print("Fig 11 saved.")
 
 
 def main():

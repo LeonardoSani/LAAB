@@ -16,22 +16,20 @@ def plot_delta_curve(
     mean = df["M3_mean"].values
 
     fig, ax = plt.subplots(figsize=(7, 4))
-    (line,) = ax.plot(xs, mean, marker="o", markersize=3, label="mean $\\delta_i$")
+    (line,) = ax.plot(xs, mean, marker="o", markersize=3, label="mean $M_3$")
     c = line.get_color()
     ax.fill_between(xs, df["M3_q5"], df["M3_q95"], alpha=0.12, color=c, label="5–95%")
     ax.fill_between(xs, df["M3_q25"], df["M3_q75"], alpha=0.28, color=c, label="25–75%")
 
     ax.axhline(ref_t0_mean, color="gray", linestyle="--", linewidth=1,
-               label=f"E0 baseline (t=0): {ref_t0_mean:.4f}")
-    ax.axhline(ref_tinf_mean, color="green", linestyle=":", linewidth=1,
-               label=f"prior t=∞: {ref_tinf_mean:.3f}")
+               label=f"baseline ($t=0$): {ref_t0_mean:.4f}")
 
     labels = [r"$\infty$" if str(t) == "inf" else str(t) for t in t_vals]
     ax.set_xticks(xs)
     ax.set_xticklabels(labels, fontsize=8)
     ax.set_xlabel("depth $t$")
-    ax.set_ylabel(r"$\delta_i$")
-    ax.set_title(r"Per-anchor mismatch $\delta_i$ over depth (Mixed)")
+    ax.set_ylabel(r"$M_3$")
+    ax.set_title(r"Per-anchor mismatch $M_3$ over depth (Mixed)")
     ax.legend(fontsize=8)
     fig.tight_layout()
     save_path = Path(save_path)

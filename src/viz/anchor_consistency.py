@@ -54,7 +54,7 @@ def plot_anchor_consistency(
                  f"$r_{{half}}$={summary['pearson_half_mean']:.2f}, "
                  f"Spearman-Brown={summary['spearman_brown_full']:.2f}")
 
-    fig.suptitle(r"E2 — Are some anchors consistently bad? (Mixed, $t=\infty$)",
+    fig.suptitle(r"Are some anchors consistently bad? (Mixed, $t=\infty$)",
                  fontsize=13)
     fig.tight_layout()
     save_path = Path(save_path)

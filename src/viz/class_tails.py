@@ -33,7 +33,7 @@ def plot_class_tails(df, save_path: Path) -> None:
     ax.set_xticklabels(classes)
     ax.set_xlabel("digit class")
     ax.set_ylabel("# anchors of class in tail")
-    ax.set_title(r"E2 — Class composition of good/bad anchor tails ($t=\infty$)")
+    ax.set_title(r"Class composition of good/bad anchor tails ($t=\infty$)")
     ax.legend(fontsize=8, ncol=2)
 
     fig.tight_layout()

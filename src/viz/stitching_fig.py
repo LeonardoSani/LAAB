@@ -28,20 +28,20 @@ def plot_stitching(
     mse_mean = stitching_df["mse_mean"].values
     mse_std = stitching_df["mse_std"].values
     ax1.errorbar(xs_t5, mse_mean, yerr=mse_std, fmt="s-", color="steelblue",
-                 capsize=4, label="MSE (E3)")
-    ax1.set_ylabel("MSE (M4)", color="steelblue")
+                 capsize=4, label=r"stitching MSE $M_4$")
+    ax1.set_ylabel(r"$M_4$ (stitching MSE)", color="steelblue")
     ax1.tick_params(axis="y", labelcolor="steelblue")
 
     # Right: q95
     q95 = delta_df["M3_q95"].values
-    ax2.plot(xs_full, q95, "o--", color="tomato", markersize=4, label=r"$q_{95}(\delta_i)$")
-    ax2.set_ylabel(r"$q_{95}(\delta_i)$", color="tomato")
+    ax2.plot(xs_full, q95, "o--", color="tomato", markersize=4, label=r"$q_{95}(M_3)$")
+    ax2.set_ylabel(r"$q_{95}(M_3)$", color="tomato")
     ax2.tick_params(axis="y", labelcolor="tomato")
 
     ax1.set_xticks(xs_full)
     ax1.set_xticklabels(full_labels, fontsize=8)
     ax1.set_xlabel("depth $t$")
-    ax1.set_title("Stitching MSE vs per-anchor tail (E3)")
+    ax1.set_title(r"Stitching $M_4$ vs per-anchor $M_3$ tail")
 
     lines1, labels1 = ax1.get_legend_handles_labels()
     lines2, labels2 = ax2.get_legend_handles_labels()
