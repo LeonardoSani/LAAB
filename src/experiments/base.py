@@ -1,11 +1,9 @@
 """Shared backbone for the cross-encoder alignment experiments E0-E4.
 
 Holds the configs, the checkpoint/anchor stores, the seed list and seed pairs,
-lazily encodes the test set once, and exposes the two relative representations
-the experiments build on:
-  - Mixed: raw embeddings Z_s(X_test) against iterated anchors phi_anchors.
-  - Full : iterated data phi_data against iterated anchors phi_anchors.
-Subclasses implement run() to write their result files.
+and lazily encodes the test set once. The Base / Mixed / Full relative
+representations are delegated to RelativeRepresentations (src/relative); this
+class only orchestrates. Subclasses implement run() to write their result files.
 """
 from itertools import combinations
 from pathlib import Path
@@ -14,7 +12,7 @@ import torch
 
 from src.config import Configs
 from src.data.mnist import get_mnist
-from src.relative.cosine_map import relative_cosine
+from src.relative.representations import RelativeRepresentations
 from src.store.anchors import AnchorStore
 from src.store.checkpoints import CheckpointStore
 from src.utils.device import get_device
@@ -36,6 +34,7 @@ class Experiment:
         self.pairs = list(combinations(self.seeds, 2))
         self._Z = None
         self._test_images = None
+        self.reps = RelativeRepresentations(self.encode_test, self.anchors)
 
     @classmethod
     def create(cls, config_dir="configs", results_dir="artifacts/results",
@@ -75,13 +74,16 @@ class Experiment:
 
     # --- relative representations ---
 
+    # Thin delegators to RelativeRepresentations, kept for call-site convenience.
+
+    def base_rep(self, seed: int) -> torch.Tensor:
+        return self.reps.base(seed)
+
     def mixed_rep(self, seed: int, t) -> torch.Tensor:
-        """Mixed rep r_s^t: raw embeddings vs depth-t iterated anchors. (|D|, N)."""
-        return relative_cosine(self.encode_test()[seed], self.anchors.phi_anchors(seed, t))
+        return self.reps.mixed(seed, t)
 
     def full_rep(self, seed: int, t) -> torch.Tensor:
-        """Full rep: depth-t iterated data vs depth-t iterated anchors. (|D|, N)."""
-        return relative_cosine(self.anchors.phi_data(seed, t), self.anchors.phi_anchors(seed, t))
+        return self.reps.full(seed, t)
 
     # --- to implement ---
 

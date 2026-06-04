@@ -18,6 +18,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.config import Configs
 from src.data.mnist import get_mnist
+from src.metrics import anchor_badness
 from src.store.anchors import AnchorStore
 from src.store.checkpoints import CheckpointStore
 from src.utils.device import get_device
@@ -122,7 +123,7 @@ class FigureMaker:
         slice_inf = cube[:, :, cube.shape[2] - 1]
         per = pd.read_csv(self.results / "e2_consistency.csv")
         summ = pd.read_csv(self.results / "e2_summary.csv", index_col="metric")["value"]
-        mu0 = cube[:, :, 0].mean(axis=1)   # t=0 alignment baseline
+        mu0 = anchor_badness(cube[:, :, 0])   # t=0 alignment baseline
         plot_anchor_consistency(
             slice_inf=slice_inf,
             mu=per.sort_values("anchor")["mu"].to_numpy(),

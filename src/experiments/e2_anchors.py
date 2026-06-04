@@ -4,8 +4,8 @@ Outputs:
   e2_delta.csv          M3 mean + quantiles vs depth        (fig3)
   e2_m3_pooled_t*.pt    pooled M3 at select depths          (fig4)
   e2_anchor_badness.npy per-anchor badness cube (N,pairs,T)
-  e2_consistency.csv    per-anchor M5 (digit, mu, std)      (fig5)
-  e2_summary.csv        split-half reliability of M5        (fig5)
+  e2_consistency.csv    per-anchor mu_i (digit, mu, std)    (fig5)
+  e2_summary.csv        split-half reliability of mu_i      (fig5)
   e2_class_tails.csv    digit-class composition of tails    (fig6)
 """
 import csv
@@ -17,7 +17,7 @@ from src.analysis.consistency import class_tail_counts, split_half_reliability
 from src.data.mnist import anchor_class_labels
 from src.depths import depth_to_str
 from src.experiments.base import Experiment
-from src.metrics import M3, per_pair_badness
+from src.metrics import M3, anchor_badness, per_pair_badness
 
 _KDE_DEPTHS = {float("inf"), 8, 64, 256, 512}
 _QS = [0.05, 0.25, 0.50, 0.75, 0.95]
@@ -68,9 +68,9 @@ class E2Anchors(Experiment):
               "e2_consistency.csv, e2_summary.csv, e2_class_tails.csv")
 
     def _consistency(self, cube, depth_grid, N):
-        """M5 split-half reliability + digit-class tails at t=inf."""
+        """mu_i split-half reliability + digit-class tails at t=inf."""
         sl = cube[:, :, depth_grid.index(float("inf"))]   # (N, n_pairs)
-        mu, sd = sl.mean(1), sl.std(1)
+        mu, sd = anchor_badness(sl), sl.std(1)
         labels = anchor_class_labels(N, n_classes=10).numpy()
         rel = split_half_reliability(sl)
         print(f"Split-half Pearson r: {rel['pearson_half_mean']:.3f} ± "

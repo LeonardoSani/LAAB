@@ -1,4 +1,4 @@
-"""Analysis built on the per-anchor badness M5: is the per-anchor ordering a
+"""Analysis built on the per-anchor badness mu_i: is the per-anchor ordering a
 reliable signal, and how does it split by digit class?
 
 Operates on a single-depth badness slice of shape (N, n_pairs): row i = anchor
@@ -7,6 +7,8 @@ badness cube).
 """
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
+
+from src.metrics import anchor_badness
 
 
 def split_half_reliability(slice_: np.ndarray, n_repeats: int = 500,
@@ -26,7 +28,7 @@ def split_half_reliability(slice_: np.ndarray, n_repeats: int = 500,
     for _ in range(n_repeats):
         perm = rng.permutation(n_pairs)
         a, b = perm[:half], perm[half:2 * half]
-        mu_a, mu_b = slice_[:, a].mean(1), slice_[:, b].mean(1)
+        mu_a, mu_b = anchor_badness(slice_[:, a]), anchor_badness(slice_[:, b])
         pear.append(pearsonr(mu_a, mu_b)[0])
         spear.append(spearmanr(mu_a, mu_b)[0])
     r_half = float(np.mean(pear))
@@ -44,7 +46,7 @@ def disjoint_half_means(slice_: np.ndarray, seed: int = 0) -> tuple[np.ndarray, 
     _, n_pairs = slice_.shape
     half = n_pairs // 2
     perm = np.random.default_rng(seed).permutation(n_pairs)
-    return slice_[:, perm[:half]].mean(1), slice_[:, perm[half:2 * half]].mean(1)
+    return anchor_badness(slice_[:, perm[:half]]), anchor_badness(slice_[:, perm[half:2 * half]])
 
 
 def class_tail_counts(mu: np.ndarray, labels: np.ndarray,

@@ -18,7 +18,7 @@ class E0Baseline(Experiment):
         self._ensure_results_dir()
         print(f"Seeds: {self.seeds} | Pairs: {len(self.pairs)} | Device: {self.device}")
 
-        reps = {s: self.mixed_rep(s, 0) for s in self.seeds}   # t=0 Mixed rep
+        reps = {s: self.base_rep(s) for s in self.seeds}   # Base rep B_s (t=0)
 
         m1_vals, m2_vals, m3_parts = [], [], []
         for s, sp in self.pairs:

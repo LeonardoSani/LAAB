@@ -1,10 +1,12 @@
-"""The five experiment metrics, M1-M5, in one place.
+"""The four metrics M1-M4 and the per-anchor badness mu_i (Method, eq. M1-M4
+and per-anchor badness), in one place.
 
 All operate on relative representations r_s(x) = relative_cosine(Z_s, A_s),
 shape (B, N): B test points x, N anchors. M1-M3 are defined pointwise on a
 test point and a seed pair, (x, s, s'); M4 is a stitching error over seeds vs a
-reference decoder; M5 is the per-anchor badness aggregated from M3.
+reference decoder; mu_i aggregates M3 into the per-anchor badness.
 """
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -56,7 +58,7 @@ def M4(
     return float(vals.mean()), float(vals.std()), per_seed
 
 
-# --- M5: per-anchor badness, built from M3 ---
+# --- per-anchor badness mu_i, built from M3 ---
 # Averaging order matters: first over test points x (per pair), then over the
 # seed couples (s, s').
 
@@ -66,7 +68,9 @@ def per_pair_badness(r_s: torch.Tensor, r_sp: torch.Tensor) -> torch.Tensor:
     return M3(r_s, r_sp).mean(dim=0)
 
 
-def M5(pair_badness: torch.Tensor) -> torch.Tensor:
-    """M5_i = mean over couples (s,s') of per_pair_badness_i.
-    (n_pairs, N) -> (N,). The final per-anchor badness mu_i."""
-    return pair_badness.mean(dim=0)
+def anchor_badness(pair_badness: np.ndarray) -> np.ndarray:
+    """Per-anchor badness mu_i = mean over seed pairs of per_pair_badness.
+    Operates on the (N, n_pairs) badness slice (or any (..., N, n_pairs)),
+    reducing the trailing pair axis -> (..., N). The reproducible per-anchor
+    signal of the Results 'Per-anchor structure' paragraph."""
+    return pair_badness.mean(axis=-1)

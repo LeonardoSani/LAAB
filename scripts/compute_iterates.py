@@ -9,7 +9,6 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from src.attractors.iteration import compute_attractors
 from src.attractors.snapshot import iterate_with_snapshots
 from src.config import AEConfig, AnchorConfig, EvalConfig
 from src.data.mnist import get_mnist, sample_anchor_source
@@ -68,19 +67,16 @@ def main():
                 continue
             with torch.no_grad():
                 z0 = model.encoder(X.to(device))
-            snaps = iterate_with_snapshots(
+            want_stats = prefix == "phi_anchors"
+            result = iterate_with_snapshots(
                 model.encoder, model.decoder, z0, depth_grid,
-                acfg.attractor_tol, acfg.attractor_max_iter)
+                acfg.attractor_tol, acfg.attractor_max_iter, return_stats=want_stats)
+            snaps, stats = result if want_stats else (result, None)
             for t, snap in snaps.items():
                 p = anchor_dir / f"{prefix}_s{s}_t{depth_to_str(t)}.pt"
                 if not p.exists():
                     torch.save(snap, p)
-            if prefix == "phi_anchors":
-                _, stats = compute_attractors(model.encoder, model.decoder, z0,
-                                              acfg.attractor_tol, acfg.attractor_max_iter)
-                print(f"  Anchors: {stats}")
-            else:
-                print(f"  Data iterates saved.")
+            print(f"  Anchors: {stats}" if want_stats else "  Data iterates saved.")
 
     print("\nDone.")
 

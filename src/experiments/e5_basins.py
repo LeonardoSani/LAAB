@@ -6,7 +6,7 @@ its attractor is compared across independently trained seeds (Jaccard, with a
 size-matched null), giving two readouts:
   - Global: are the basins shared across seeds, or seed-specific?
   - Per-anchor: does basin (in)consistency explain the per-anchor badness mu_i
-    (M5, reused from E2's badness cube)?
+    (reused from E2's badness cube)?
 
 Outputs:
   e5_basins.csv         summary scalars (basin sizes, Jaccard vs null, label
@@ -21,6 +21,7 @@ from scipy.stats import pearsonr, spearmanr
 from src.analysis.basins import (basin_masks, cross_seed_jaccard,
                                   label_agreement, nearest_anchor_labels)
 from src.experiments.base import Experiment
+from src.metrics import anchor_badness
 
 _TAU = 0.99
 
@@ -87,4 +88,4 @@ class E5Basins(Experiment):
         """Per-anchor badness mu_i at t=inf, from the E2 badness cube."""
         cube = np.load(self.results_dir / "e2_anchor_badness.npy")  # (N, pairs, T)
         idx = self.configs.eval.depth_grid.index(float("inf"))
-        return cube[:, :, idx].mean(axis=1)
+        return anchor_badness(cube[:, :, idx])
