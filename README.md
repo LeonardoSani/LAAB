@@ -3,7 +3,7 @@
 
 ![](./animation.gif)
 
-Independently trained autoencoders give cross-seed–reproducible *relative representations* at the base, but this alignment is progressively lost as the latent self-map is iterated toward its attractors. Cosine similarity stays high while the codes drift apart; at the attractors alignment is provably impossible, because independently trained models do not share their attractor basins.
+Independently trained autoencoders give cross-seed–reproducible *relative representations* at the base, but this alignment is progressively lost as the latent self-map is iterated toward its attractors.
 
 📄 **Paper:** _link to be added_
 
