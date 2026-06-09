@@ -1,8 +1,4 @@
-"""Access to trained model checkpoints in artifacts/checkpoints/.
-
-Single home for seed discovery and model loading — replaces the find_seeds /
-load_ae helpers that were copy-pasted across every script.
-"""
+"""Checkpoints in artifacts/checkpoints/: seed discovery + model loading."""
 import re
 from pathlib import Path
 
@@ -19,7 +15,7 @@ class CheckpointStore:
 
     @property
     def seeds(self) -> list[int]:
-        """Sorted training seeds discovered from ae_s{seed}.pt files."""
+        """Sorted seeds from ae_s{seed}.pt files."""
         seeds = []
         for p in sorted(self.ckpt_dir.glob("ae_s*.pt")):
             m = re.match(r"ae_s(\d+)\.pt", p.name)

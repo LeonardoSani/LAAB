@@ -4,29 +4,24 @@ from pathlib import Path
 
 
 def plot_class_tails(df, save_path: Path) -> None:
-    """Figure 6 (E2): digit-class composition of good/bad tails.
-
-    Per class, two bars: good (green) and bad (red). Within each, the light
-    bar is the 20% tail count, the strong bar the 10% subset overlaid on top
-    (10% is nested in 20%). A faint marker shows the class size (ceiling)."""
+    """Fig 6: digit-class composition of good/bad mu tails. Green/red bars,
+    light = 20% tail, strong = 10% nested; marker = class size."""
     classes = df["class"].to_numpy()
     x = np.arange(len(classes))
     w = 0.4
 
     fig, ax = plt.subplots(figsize=(11, 5))
 
-    # good (green): light=20%, strong=10% overlaid
+    # good (green) / bad (red): 20% light, 10% strong overlaid
     ax.bar(x - w / 2, df["good20"], w, color="green", alpha=0.30,
            label="best 20%")
     ax.bar(x - w / 2, df["good10"], w, color="green", alpha=1.0,
            label="best 10%")
-    # bad (red): light=20%, strong=10% overlaid
     ax.bar(x + w / 2, df["bad20"], w, color="red", alpha=0.30,
            label="worst 20%")
     ax.bar(x + w / 2, df["bad10"], w, color="red", alpha=1.0,
            label="worst 10%")
 
-    # class-size ceiling reference
     ax.plot(x, df["n_class"], "k_", ms=18, alpha=0.5, label="anchors in class")
 
     ax.set_xticks(x)

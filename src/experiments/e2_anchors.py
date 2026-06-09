@@ -1,12 +1,7 @@
-"""E2: per-anchor mismatch under the attractor dynamics (the consolidated E2).
+"""E2: per-anchor mismatch under the dynamics.
 
-Outputs:
-  e2_delta.csv          M3 mean + quantiles vs depth        (fig3)
-  e2_m3_pooled_t*.pt    pooled M3 at select depths          (fig4)
-  e2_anchor_badness.npy per-anchor badness cube (N,pairs,T)
-  e2_consistency.csv    per-anchor mu_i (digit, mu, std)    (fig5)
-  e2_summary.csv        split-half reliability of mu_i      (fig5)
-  e2_class_tails.csv    digit-class composition of tails    (fig6)
+Outputs: e2_delta.csv, e2_m3_pooled_t*.pt, e2_anchor_badness.npy (N,pairs,T),
+e2_consistency.csv, e2_summary.csv, e2_class_tails.csv.
 """
 import csv
 
@@ -45,8 +40,7 @@ class E2Anchors(Experiment):
                 cube[:, p_idx, k] = per_pair_badness(reps[s], reps[sp]).numpy()
 
             m3_pooled = torch.cat(m3_parts)
-            # exact quantiles over the full pool (deterministic; numpy has no
-            # element cap, unlike torch.quantile)
+            # numpy quantile: exact over the full pool (torch caps elements)
             q5, q25, q50, q75, q95 = (float(v) for v in np.quantile(m3_pooled.numpy(), _QS))
             delta_rows.append({
                 "t": depth_to_str(t), "M3_mean": float(m3_pooled.mean()),
@@ -68,8 +62,8 @@ class E2Anchors(Experiment):
               "e2_consistency.csv, e2_summary.csv, e2_class_tails.csv")
 
     def _consistency(self, cube, depth_grid, N):
-        """mu_i split-half reliability + digit-class tails at t=inf."""
-        sl = cube[:, :, depth_grid.index(float("inf"))]   # (N, n_pairs)
+        """mu_i reliability + digit-class tails at t=inf."""
+        sl = cube[:, :, depth_grid.index(float("inf"))]
         mu, sd = anchor_badness(sl), sl.std(1)
         labels = anchor_class_labels(N, n_classes=10).numpy()
         rel = split_half_reliability(sl)

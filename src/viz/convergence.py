@@ -1,4 +1,4 @@
-"""Convergence plot: mean L2 residual ||z_{t+1} - z_t|| vs iteration."""
+"""Mean residual ||Δz|| vs iteration."""
 import math
 from pathlib import Path
 
@@ -10,24 +10,18 @@ from src.attractors.iteration import ConvergenceStats
 def plot_convergence(
     stats_per_label: dict[str, ConvergenceStats],
     save_path: Path,
-    tol: float = 1e-6,
+    tol: float,
 ):
-    """
-    Plot mean L2 residual ||z_{t+1} - z_t||_2 vs iteration on a log-y scale.
-
-    stats_per_label: e.g. {"BASE s=1": stats_base, "EXTRA s=1": stats_extra}
-    tol:             convergence threshold on squared L2 — drawn as dashed line at sqrt(tol)
-    """
+    """Mean ||Δz|| vs iteration (log-y), threshold at sqrt(tol)."""
     fig, ax = plt.subplots(figsize=(7, 4))
 
     for label, stats in stats_per_label.items():
         if not stats.residuals:
-            print(f"  Warning: no residuals in stats for '{label}'. Pass track_residuals=True.")
+            print(f"  Warning: no residuals for '{label}'. Pass track_residuals=True.")
             continue
         iters = range(1, len(stats.residuals) + 1)
         ax.plot(list(iters), stats.residuals, label=label, linewidth=1.5)
 
-    # Convergence threshold line: ||z_{t+1} - z_t|| < sqrt(tol)
     thresh = math.sqrt(tol)
     ax.axhline(thresh, color="black", linestyle="--", linewidth=1.0, label=f"threshold √tol = {thresh:.0e}")
 

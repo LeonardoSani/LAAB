@@ -1,7 +1,4 @@
-"""E1: Mixed-alignment breakdown over the depth grid.
-
-Output: e1_mixed.csv — M1/M2 mean + quantiles (q5,q25,q75,q95) per depth.
-"""
+"""E1: Mixed-alignment breakdown over depth. -> e1_mixed.csv (M1/M2, quantiles)."""
 import csv
 
 import torch
@@ -18,7 +15,7 @@ _FIELDS = ["t", "M1_mean", "M1_q5", "M1_q25", "M1_q75", "M1_q95",
 class E1Mixed(Experiment):
     name = "e1"
 
-    def run(self):
+    def run(self, run_decomposition: bool = False):
         self._ensure_results_dir()
         depth_grid = self.configs.eval.depth_grid
         print(f"Seeds: {self.seeds} | Pairs: {len(self.pairs)} | Depths: {len(depth_grid)}")
@@ -51,3 +48,35 @@ class E1Mixed(Experiment):
             w.writeheader()
             w.writerows(rows)
         print("Saved e1_mixed.csv")
+
+        if run_decomposition:
+            print("\nRunning decomposition as requested (--decomposition / -d)")
+            self.run_decomposition()
+    def run_decomposition(self):
+        """M1^2 = norm-difference + direction terms over depth (prints a table)."""
+        import itertools
+
+        depths = self.configs.eval.depth_grid
+        store = self.anchors
+        seeds = [s for s in self.seeds if store.has_data(s, 0)]
+
+        reps = self.reps
+
+        print(f"{'t':>5} {'mean|r|':>8} {'M1':>7} {'M2':>9} {'normdiff%':>9} {'direction%':>10}")
+        for t in depths:
+            rep_t = {s: reps.mixed(s, t) for s in seeds}
+            nd_tot = dir_tot = m1sq_tot = m2_tot = rnorm_tot = 0.0
+            n = 0
+            for s, s2 in itertools.combinations(seeds, 2):
+                r, rp = rep_t[s], rep_t[s2]
+                nr, nrp = r.norm(dim=1), rp.norm(dim=1)
+                cos = (r * rp).sum(1) / (nr * nrp).clamp_min(1e-12)
+                nd_tot += (nr - nrp).pow(2).sum().item()
+                dir_tot += (2 * nr * nrp * (1 - cos)).sum().item()
+                m1sq_tot += (r - rp).pow(2).sum(1).sum().item()
+                m2_tot += (1 - cos).sum().item()
+                rnorm_tot += nr.sum().item()
+                n += r.shape[0]
+            tlab = "inf" if t == float("inf") else int(t)
+            print(f"{str(tlab):>5} {rnorm_tot/n:8.3f} {(m1sq_tot/n)**0.5:7.3f} "
+                  f"{m2_tot/n:9.5f} {100*nd_tot/m1sq_tot:9.1f} {100*dir_tot/m1sq_tot:10.1f}")

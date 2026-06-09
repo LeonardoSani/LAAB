@@ -1,9 +1,4 @@
-"""E4: Full vector-field check — M1/M2 on the Full rep (iterated data vs
-iterated anchors) over the depth grid, to compare frame drift against the
-fundamental breakdown seen in the Mixed rep (E1).
-
-Output: e4_full.csv — M1/M2 mean + quantiles (q5,q25,q75,q95) per depth.
-"""
+"""E4: Full rep M1/M2 over depth (widens gap beyond Mixed). -> e4_full.csv."""
 import csv
 
 import torch

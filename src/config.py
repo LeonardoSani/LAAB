@@ -1,9 +1,4 @@
-"""Typed configuration objects, loaded from the YAML files in configs/.
-
-Replaces the scattered `yaml.safe_load(...)` + dict-indexing that every script
-used to repeat. Unknown YAML keys are ignored so the configs can carry
-documentation/extra fields without breaking construction.
-"""
+"""Typed configs from configs/*.yaml; unknown keys ignored."""
 from dataclasses import dataclass, fields
 from pathlib import Path
 
@@ -24,7 +19,7 @@ def _known(cls, d: dict) -> dict:
 
 @dataclass
 class AEConfig:
-    """Autoencoder architecture + training hyper-parameters (configs/ae.yaml)."""
+    """AE architecture + training (configs/ae.yaml)."""
     latent_dim: int
     channel_base: int
     in_channels: int
@@ -46,11 +41,9 @@ class AEConfig:
 
 @dataclass
 class AnchorConfig:
-    """Anchor sampling + attractor-iteration settings (configs/anchors.yaml)."""
+    """Anchor sampling (configs/anchors.yaml)."""
     N: int
     sampling_seed: int = 42
-    attractor_tol: float = 1.0e-6
-    attractor_max_iter: int = 3000
 
     @classmethod
     def load(cls, path="configs/anchors.yaml") -> "AnchorConfig":
@@ -58,8 +51,20 @@ class AnchorConfig:
 
 
 @dataclass
+class AttractorConfig:
+    """Iteration + cosine threshold (configs/attractors.yaml)."""
+    attractor_tol: float = 1.0e-6     # ||Δz||² convergence threshold
+    attractor_max_iter: int = 3000
+    tau: float = 0.99                 # cos threshold for basin / attractor equality
+
+    @classmethod
+    def load(cls, path="configs/attractors.yaml") -> "AttractorConfig":
+        return cls(**_known(cls, _read(path)))
+
+
+@dataclass
 class EvalConfig:
-    """Evaluation grid (configs/eval.yaml). Depth lists parsed to typed depths."""
+    """Eval grid (configs/eval.yaml)."""
     reference_seed: int
     num_seeds: int
     depth_grid: list[DepthLike]
@@ -78,9 +83,10 @@ class EvalConfig:
 
 @dataclass
 class Configs:
-    """Bundle of the three configs, for convenient single-call loading."""
+    """All four configs."""
     ae: AEConfig
     anchors: AnchorConfig
+    attractors: AttractorConfig
     eval: EvalConfig
 
     @classmethod
@@ -89,5 +95,6 @@ class Configs:
         return cls(
             ae=AEConfig.load(d / "ae.yaml"),
             anchors=AnchorConfig.load(d / "anchors.yaml"),
+            attractors=AttractorConfig.load(d / "attractors.yaml"),
             eval=EvalConfig.load(d / "eval.yaml"),
         )

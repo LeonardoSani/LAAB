@@ -5,7 +5,7 @@ from pathlib import Path
 
 
 def _ordinal_axis(ax, t_vals):
-    """Set ordinal x-axis with depth labels."""
+    """Ordinal x-axis with depth labels."""
     positions = list(range(len(t_vals)))
     labels = [r"$\infty$" if t == "inf" or t == float("inf") else str(t) for t in t_vals]
     ax.set_xticks(positions)
@@ -14,7 +14,7 @@ def _ordinal_axis(ax, t_vals):
 
 
 def _quantile_bands(ax, xs, df, metric, color):
-    """Draw nested quantile bands: 5–95 (outer, light) and 25–75 (inner, dark)."""
+    """Nested quantile bands: 5–95 (light), 25–75 (dark)."""
     ax.fill_between(xs, df[f"{metric}_q5"], df[f"{metric}_q95"],
                     alpha=0.12, color=color, label="5–95%")
     ax.fill_between(xs, df[f"{metric}_q25"], df[f"{metric}_q75"],
@@ -24,9 +24,9 @@ def _quantile_bands(ax, xs, df, metric, color):
 def plot_mixed_curves(
     df: pd.DataFrame,       # e1_mixed.csv
     save_path: Path,
-    baseline: dict,         # {"M1_mean": float, "M2_mean": float} from e0_baseline.csv
+    baseline: dict,         # {"M1_mean", "M2_mean"} from e0_baseline.csv
 ) -> None:
-    """Figure 2 (E1): two panels (M1 left, M2 right), mean + nested quantile bands."""
+    """Fig 2: M1 (left), M2 (right), mean + nested quantile bands."""
     t_vals = df["t"].tolist()
     xs = list(range(len(t_vals)))
 
@@ -56,7 +56,7 @@ def plot_full_vs_mixed(
     df_full: pd.DataFrame,   # e4_full.csv
     save_path: Path,
 ) -> None:
-    """Figure 7 (E4): M1 curves for Mixed (solid) and Full (dashed), nested quantile bands."""
+    """Fig 8: M1 for Mixed (solid) and Full (dashed)."""
     t_vals = df_mixed["t"].tolist()
     xs = list(range(len(t_vals)))
 

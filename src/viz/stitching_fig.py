@@ -5,18 +5,17 @@ from pathlib import Path
 
 
 def plot_stitching(
-    stitching_df: pd.DataFrame,  # e3_stitching.csv: columns t, mse_mean, mse_std
-    delta_df: pd.DataFrame,      # e2_delta.csv: columns t, M3_q95 (for secondary axis)
+    stitching_df: pd.DataFrame,  # e3_stitching.csv
+    delta_df: pd.DataFrame,      # e2_delta.csv (M3_q95)
     save_path: Path,
 ) -> None:
-    """Figure 6 (E3): left y-axis MSE ± std at T_5; right y-axis q95(delta_i) over full T.
-    Shared ordinal x-axis."""
-    # Full T for q95 curve (13 depths)
+    """Fig 7: stitching MSE ± std (left) and M3 q95 (right) over depth."""
+    # full depth grid for the q95 curve
     t_full = delta_df["t"].tolist()
     xs_full = list(range(len(t_full)))
     full_labels = [r"$\infty$" if str(t) == "inf" else str(t) for t in t_full]
 
-    # T_5 for MSE bars — map to ordinal positions in T_full
+    # decoder depths -> ordinal positions in the full grid
     t5_strs = [str(t) for t in stitching_df["t"].tolist()]
     t_full_strs = [str(t) for t in t_full]
     xs_t5 = [t_full_strs.index(s) for s in t5_strs]
@@ -24,7 +23,6 @@ def plot_stitching(
     fig, ax1 = plt.subplots(figsize=(8, 5))
     ax2 = ax1.twinx()
 
-    # Left: MSE
     mse_mean = stitching_df["mse_mean"].values
     mse_std = stitching_df["mse_std"].values
     ax1.errorbar(xs_t5, mse_mean, yerr=mse_std, fmt="s-", color="steelblue",
@@ -32,7 +30,6 @@ def plot_stitching(
     ax1.set_ylabel(r"$M_4$ (stitching MSE)", color="steelblue")
     ax1.tick_params(axis="y", labelcolor="steelblue")
 
-    # Right: q95
     q95 = delta_df["M3_q95"].values
     ax2.plot(xs_full, q95, "o--", color="tomato", markersize=4, label=r"$q_{95}(M_3)$")
     ax2.set_ylabel(r"$q_{95}(M_3)$", color="tomato")

@@ -6,7 +6,7 @@ from torchvision import datasets, transforms
 
 
 def get_mnist(data_dir="artifacts/data"):
-    """Download and return (train_dataset, test_dataset), pixels in [0,1]."""
+    """(train, test) datasets, pixels in [0,1]."""
     tf = transforms.ToTensor()
     train = datasets.MNIST(data_dir, train=True, download=True, transform=tf)
     test = datasets.MNIST(data_dir, train=False, download=True, transform=tf)
@@ -14,7 +14,7 @@ def get_mnist(data_dir="artifacts/data"):
 
 
 def split_train_val(train_dataset, val_fraction=0.1, seed=0):
-    """Split training set into (train_subset, val_subset) with fixed seed."""
+    """Split train into (train, val) with fixed seed."""
     n = len(train_dataset)
     n_val = int(n * val_fraction)
     gen = torch.Generator().manual_seed(seed)
@@ -22,7 +22,7 @@ def split_train_val(train_dataset, val_fraction=0.1, seed=0):
 
 
 def get_dataloaders(cfg, data_dir="artifacts/data"):
-    """Return (train_loader, val_loader, test_loader). cfg is an AEConfig."""
+    """(train, val, test) loaders."""
     train_full, test = get_mnist(data_dir)
     train_sub, val_sub = split_train_val(train_full, cfg.val_fraction, cfg.val_seed)
 
@@ -35,11 +35,7 @@ def get_dataloaders(cfg, data_dir="artifacts/data"):
 
 
 def sample_anchor_source(dataset, N=256, seed=42):
-    """
-    Sample N images balanced across 10 MNIST classes.
-    dataset: full train MNIST dataset (not a Subset).
-    Returns Tensor (N, 1, 28, 28).
-    """
+    """N class-balanced images, in class order -> (N, 1, 28, 28)."""
     if isinstance(dataset, Subset):
         base = dataset.dataset
         sub_idx = torch.tensor(dataset.indices)
@@ -67,11 +63,7 @@ def sample_anchor_source(dataset, N=256, seed=42):
 
 
 def anchor_class_labels(N=256, n_classes=10):
-    """Digit class per anchor index for an anchor set built by
-    sample_anchor_source. That function fills class blocks in order (class 0
-    first, then 1, ...), giving the first N % n_classes classes one extra
-    sample, so the label of each index is deterministic and seed-independent.
-    Returns LongTensor (N,)."""
+    """Digit class per anchor index, matching sample_anchor_source layout -> (N,)."""
     base, rem = divmod(N, n_classes)
     labels = []
     for c in range(n_classes):

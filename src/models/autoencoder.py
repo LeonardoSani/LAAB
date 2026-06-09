@@ -13,7 +13,7 @@ class Autoencoder(nn.Module):
 
     @classmethod
     def from_checkpoint(cls, ckpt_path, cfg, device) -> "Autoencoder":
-        """Build from an AEConfig and load a trained checkpoint, in eval mode."""
+        """Build from AEConfig and load a checkpoint (eval mode)."""
         model = cls(
             latent_dim=cfg.latent_dim, channel_base=cfg.channel_base,
             in_channels=cfg.in_channels, img_size=cfg.img_size,

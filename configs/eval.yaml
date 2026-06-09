@@ -1,7 +1,7 @@
 reference_seed: 1
 num_seeds: 10
 
-depth_grid:                 # T (13 ordinal positions; 'inf' rendered to convergence)
+depth_grid:                 # 'inf' = to convergence
   - 0
   - 1
   - 2
@@ -16,7 +16,7 @@ depth_grid:                 # T (13 ordinal positions; 'inf' rendered to converg
   - 1024
   - inf
 
-decoder_depths:             # T_5 (subset for E3 stitching decoders)
+decoder_depths:             # subset for E3 stitching decoders
   - 0
   - 8
   - 64

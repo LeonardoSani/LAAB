@@ -8,7 +8,7 @@ from src.relative.cosine_map import relative_cosine
 
 
 def _pick_one_per_class(test_ds, n_classes: int = 10, seed: int = 0) -> list[int]:
-    """Return one index per digit class (0-9), deterministic."""
+    """One index per digit class, deterministic."""
     rng = np.random.default_rng(seed)
     per_class: dict[int, list[int]] = {c: [] for c in range(n_classes)}
     for idx in range(len(test_ds)):
@@ -24,7 +24,7 @@ def _pick_one_per_class(test_ds, n_classes: int = 10, seed: int = 0) -> list[int
 
 
 def _to_img(t: torch.Tensor) -> np.ndarray:
-    """(1,H,W) tensor in [0,1] → (H,W) float32 numpy."""
+    """(1,H,W) -> (H,W) numpy in [0,1]."""
     return t.squeeze(0).cpu().float().numpy().clip(0, 1)
 
 
@@ -35,17 +35,17 @@ def _decode_mixed(
     rel_decoder: nn.Module,
     images: torch.Tensor,        # (B, 1, 28, 28)
     device: torch.device,
-) -> torch.Tensor:               # (B, 1, 28, 28) on CPU
+) -> torch.Tensor:               # (B, 1, 28, 28) CPU
     encoder.eval()
     rel_decoder.eval()
-    z = encoder(images.to(device))          # (B, k)
-    rep = relative_cosine(z, anchors.to(device))  # (B, N)
-    x_hat = rel_decoder(rep)               # (B, 1, 28, 28)
+    z = encoder(images.to(device))
+    rep = relative_cosine(z, anchors.to(device))
+    x_hat = rel_decoder(rep)
     return x_hat.cpu()
 
 
 def _render_grid(
-    rows: list[list[np.ndarray]],   # [row][col] → (H,W) image
+    rows: list[list[np.ndarray]],   # [row][col] -> (H,W)
     col_labels: list[str],
     row_labels: list[str],
     title: str,
@@ -74,28 +74,27 @@ def _render_grid(
 
 
 def plot_stitching_grid(
-    ae_s1: nn.Module,            # AE seed 1 (ref encoder + decoder)
-    encoder_s2: nn.Module,       # encoder seed 2 (cross-encoder source)
-    anchors_s2: dict,            # {t: (N,k) tensor} for seed 2, t in decoder_depths
-    rel_decoders: dict,          # {t: RelativeDecoder} for decoder_depths
+    ae_s1: nn.Module,            # AE seed 1 (ref)
+    encoder_s2: nn.Module,       # cross-encoder source
+    anchors_s2: dict,            # {t: (N,k)} for seed 2
+    rel_decoders: dict,          # {t: RelativeDecoder}
     test_ds,
     device: torch.device,
     save_path: Path,
 ) -> None:
-    """Matrix 1 (stitching): 10 rows × 7 cols.
-    Cols: orig | AE s=1 | D_r^t(M_2^t) for t in {0,8,64,512,inf}"""
+    """Fig 9: stitching grid, cols orig | AE s=1 | D_r^t(Mixed s=2)."""
     depth_order = [0, 8, 64, 512, float("inf")]
     depth_labels = ["t=0", "t=8", "t=64", "t=512", r"t=∞"]
     col_labels = ["orig", "AE s=1"] + [f"D_r({lbl})\nMixed" for lbl in depth_labels]
 
     idxs = _pick_one_per_class(test_ds)
-    imgs = torch.stack([test_ds[i][0] for i in idxs])  # (10,1,28,28)
+    imgs = torch.stack([test_ds[i][0] for i in idxs])
     labels = [int(test_ds[i][1]) for i in idxs]
     row_labels = [str(lbl) for lbl in labels]
 
     ae_s1.eval()
     with torch.no_grad():
-        ae_recon = ae_s1(imgs.to(device)).cpu()  # (10,1,28,28)
+        ae_recon = ae_s1(imgs.to(device)).cpu()
 
     decoded_per_t = {}
     for t in depth_order:
@@ -116,15 +115,14 @@ def plot_stitching_grid(
 
 
 def plot_reference_grid(
-    ae_s1: nn.Module,            # AE seed 1 (ref encoder + decoder)
-    anchors_s1: dict,            # {t: (N,k) tensor} for seed 1, t in decoder_depths
+    ae_s1: nn.Module,            # AE seed 1 (ref)
+    anchors_s1: dict,            # {t: (N,k)} for seed 1
     rel_decoders: dict,          # {t: RelativeDecoder}
     test_ds,
     device: torch.device,
     save_path: Path,
 ) -> None:
-    """Matrix 2 (reference): 10 rows × 7 cols.
-    Cols: orig | AE s=1 | D_r^t(M_1^t) for t in {0,8,64,512,inf}"""
+    """Fig 10: reference grid, cols orig | AE s=1 | D_r^t(Mixed s=1)."""
     depth_order = [0, 8, 64, 512, float("inf")]
     depth_labels = ["t=0", "t=8", "t=64", "t=512", r"t=∞"]
     col_labels = ["orig", "AE s=1"] + [f"D_r({lbl})\nM₁" for lbl in depth_labels]

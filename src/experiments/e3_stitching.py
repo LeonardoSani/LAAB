@@ -1,9 +1,5 @@
-"""E3: stitching degradation (M4) over the relative-decoder depths.
-
-Decodes each seed's Mixed rep through the reference relative decoder and
-measures MSE vs the image. Outputs e3_stitching.csv and e3_stitching_per_seed.csv.
-Requires the trained relative decoders (train_relative_decoder.py).
-"""
+"""E3: zero-shot stitching error M4 over the decoder depths.
+Needs trained relative decoders. -> e3_stitching{,_per_seed}.csv."""
 import csv
 import sys
 

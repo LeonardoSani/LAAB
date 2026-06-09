@@ -12,19 +12,14 @@ def plot_anchor_consistency(
     save_path: Path,
     baseline: dict = None,   # t=0 per-anchor badness range {min,median,max}
 ) -> None:
-    """Figure 5 (E2): do consistently good/bad anchors exist?
-    (a) sorted mu_i with per-pair IQR band — shows the spread of per-anchor
-    badness; (b) split-half reliability scatter — mu_i computed on two
-    disjoint halves of the seed pairs, showing the ranking is reproducible
-    despite weak single-pair consistency (Spearman-Brown upgrades r_half to
-    the reliability of the full-set mu_i)."""
+    """Fig 5: (a) sorted mu_i with per-pair IQR; (b) split-half reliability scatter."""
     N, n_pairs = slice_inf.shape
     q25, q75 = np.percentile(slice_inf, [25, 75], axis=1)
     order = np.argsort(mu)[::-1]
 
     fig, axes = plt.subplots(1, 2, figsize=(13, 5))
 
-    # (a) sorted mu with per-pair IQR band
+    # (a) sorted mu, per-pair IQR band
     ax = axes[0]
     xs = np.arange(N)
     ax.plot(xs, mu[order], color="C0", lw=1.5)
@@ -33,7 +28,6 @@ def plot_anchor_consistency(
     ax.axhline(np.median(mu), color="gray", ls=":",
                label=f"median={np.median(mu):.3f}")
     if baseline is not None:
-        # t=0 alignment reference: even the best anchor sits far above it
         ax.axhspan(baseline["min"], baseline["max"], color="green", alpha=0.18,
                    label=f"t=0 baseline (≤{baseline['max']:.3f})")
         ax.set_ylim(bottom=0)
@@ -42,7 +36,7 @@ def plot_anchor_consistency(
     ax.set_title("(a) Per-anchor badness profile")
     ax.legend(fontsize=8)
 
-    # (b) split-half reliability scatter
+    # (b) split-half reliability
     ax = axes[1]
     a, b = disjoint_half_means(slice_inf, seed=0)
     ax.scatter(a, b, s=10, alpha=0.5, color="C3")

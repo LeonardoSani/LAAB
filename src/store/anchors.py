@@ -1,11 +1,5 @@
-"""Access to the anchor source set and cached iterate tensors in
-artifacts/anchors/.
-
-phi_anchors_s{s}_t{T}.pt : (N, k)     anchor set X_a iterated to depth T under E_s
-phi_data_s{s}_t{T}.pt    : (|D|, k)   full test set iterated to depth T under E_s
-
-Replaces every ad-hoc torch.load(anchor_dir / "phi_...") in the scripts.
-"""
+"""Cached iterates in artifacts/anchors/: phi_anchors_s{s}_t{T}.pt (N,k),
+phi_data_s{s}_t{T}.pt (|D|,k)."""
 from pathlib import Path
 
 import torch

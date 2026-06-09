@@ -8,10 +8,7 @@ def plot_basin_consistency(
     J_null: np.ndarray,   # (N,) size-matched chance Jaccard
     save_path: Path,
 ) -> None:
-    """E5 (global): are attractor basins shared across independently trained
-    seeds? The per-anchor cross-seed basin Jaccard sits at its size-matched
-    chance level, so the dynamics are not shared — independently trained fields
-    carve the data into different basins."""
+    """Fig 11: mean basin Jaccard vs size-matched chance."""
     obs, chance = float(J.mean()), float(J_null.mean())
 
     fig, ax = plt.subplots(figsize=(4.6, 4.6))

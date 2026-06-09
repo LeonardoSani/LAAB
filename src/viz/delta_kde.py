@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 from scipy.stats import gaussian_kde
 
-_KDE_MAX_SAMPLES = 100_000  # gaussian_kde is O(n) per eval point; cap for speed
+_KDE_MAX_SAMPLES = 100_000  # cap: gaussian_kde is O(n) per eval point
 
 
 def _kde_subsample(vals: np.ndarray) -> np.ndarray:
@@ -15,12 +15,12 @@ def _kde_subsample(vals: np.ndarray) -> np.ndarray:
 
 
 def plot_delta_kde_single(
-    delta_vals: torch.Tensor,  # flat pooled M3 values from Pi_delta^0
+    delta_vals: torch.Tensor,  # flat pooled M3 at t=0
     save_path: Path,
     log_scale: bool = False,
     annotate_mean: bool = True,
 ) -> None:
-    """Figure 1 (E0): single-panel KDE of pooled delta_i at t=0."""
+    """Fig 1: KDE of pooled M3 at t=0."""
     vals = delta_vals.numpy().astype(np.float64).ravel()
     kde = gaussian_kde(_kde_subsample(vals), bw_method="scott")
     x = np.linspace(vals.min(), vals.max(), 512)
@@ -49,12 +49,10 @@ def plot_delta_kde_single(
 
 
 def plot_delta_kde_grid(
-    delta_per_t: dict,  # {t: flat tensor} for t in {0, 8, 64, 256, 512, inf}
+    delta_per_t: dict,  # {t: flat tensor} for t in {0,8,64,256,512,inf}
     save_path: Path,
 ) -> None:
-    """Figure 4 (E2): 6-panel KDE grid (shared linear y-axis), 3 rows × 2 cols.
-    Panels: t=0 (baseline), 8, 64, 256, 512, inf.
-    Each panel: KDE with dashed verticals at q50 and q95. Bandwidth: Scott's rule."""
+    """Fig 4: 6-panel M3 KDE grid (shared linear y), dashed q50/q95."""
     t_keys = list(delta_per_t.keys())
     n = len(t_keys)
     ncols = 2
@@ -62,18 +60,15 @@ def plot_delta_kde_grid(
     fig, axes = plt.subplots(nrows, ncols, figsize=(10, nrows * 3.5))
     axes = axes.ravel()
 
-    # Common x-axis range across all panels
+    # common x-range across panels
     all_vals = [delta_per_t[t].numpy().astype(np.float64).ravel() for t in t_keys]
     x_min = min(v.min() for v in all_vals)
     x_max = max(v.max() for v in all_vals)
 
-    # Precompute KDE curves to derive a common (linear) y-axis range.
-    # Linear density keeps the distribution shape visible; a log axis with
-    # fill_between fills to ~0 and turns broad distros into solid blocks.
+    # linear density keeps shape; log + fill_between turns broad distros to blocks
     x = np.linspace(x_min, x_max, 512)
     ys = [gaussian_kde(_kde_subsample(vals), bw_method="scott")(x) for vals in all_vals]
-    # Shared y-cap = 2x median per-panel peak. Keeps broad late-t humps fully
-    # visible; tall narrow early-t spikes (t=0, 8) clip at the top edge.
+    # shared y-cap = 2x median peak; narrow early-t spikes clip
     peaks = [y.max() for y in ys]
     y_top = float(np.median(peaks)) * 2.0
 

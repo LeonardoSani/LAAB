@@ -1,4 +1,4 @@
-"""§11.1 — Latent space PCA scatter across seeds."""
+"""Latent PCA scatter across seeds (diagnostic)."""
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -7,21 +7,16 @@ import torch
 
 
 def pca_project(Z: torch.Tensor, fit_Z: torch.Tensor | None = None) -> np.ndarray:
-    """
-    Project (N, k) embeddings to 2D via PCA.
-    fit_Z: if given, PCA is fitted on fit_Z and applied to Z (shared PCA).
-           if None, PCA is fitted on Z itself (independent PCA).
-    Returns (N, 2) numpy array.
-    """
+    """PCA-project (N, k) to 2D, fitting on fit_Z if given else Z -> (N, 2)."""
     Z_f = Z.float().cpu()
     fit = fit_Z.float().cpu() if fit_Z is not None else Z_f
     mean = fit.mean(0)
     _, _, Vh = torch.linalg.svd(fit - mean, full_matrices=False)
-    components = Vh[:2].T          # (k, 2)
+    components = Vh[:2].T
     return ((Z_f - mean) @ components).numpy()
 
 
-CLASS_COLORS = plt.cm.tab10.colors  # 10 distinct colors
+CLASS_COLORS = plt.cm.tab10.colors
 
 
 def plot_latent_scatter(
@@ -30,21 +25,13 @@ def plot_latent_scatter(
     save_dir: Path,
     shared_pca_ref_seed: int | None = 1,
 ):
-    """
-    Produce two scatter plots per §11.1:
-      1. Independent PCA per seed  -> latent_pca_per_seed.png
-      2. Shared PCA (fit on ref seed, applied to all) -> latent_pca_shared.png
-
-    embeddings_per_seed: {seed: (N, k) tensor}
-    labels: (N,) integer class labels
-    shared_pca_ref_seed: seed used to fit the shared PCA basis
-    """
+    """Independent PCA per seed + shared PCA fit on ref seed."""
     save_dir.mkdir(parents=True, exist_ok=True)
     seeds = sorted(embeddings_per_seed.keys())
     n = len(seeds)
     labs = labels.cpu().numpy()
 
-    # --- Independent PCA ---
+    # independent PCA
     fig, axes = plt.subplots(1, n, figsize=(4 * n, 4))
     if n == 1:
         axes = [axes]
@@ -63,7 +50,7 @@ def plot_latent_scatter(
     plt.close(fig)
     print(f"  Saved {path}")
 
-    # --- Shared PCA (fit on reference seed) ---
+    # shared PCA (fit on reference seed)
     if shared_pca_ref_seed is not None and shared_pca_ref_seed in embeddings_per_seed:
         ref_Z = embeddings_per_seed[shared_pca_ref_seed]
         fig, axes = plt.subplots(1, n, figsize=(4 * n, 4))

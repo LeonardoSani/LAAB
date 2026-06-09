@@ -5,12 +5,12 @@ from pathlib import Path
 
 
 def plot_delta_curve(
-    df: pd.DataFrame,        # e2_delta.csv: columns t, M3_mean, M3_q5, M3_q25, M3_q50, M3_q75, M3_q95
+    df: pd.DataFrame,        # e2_delta.csv
     save_path: Path,
-    ref_t0_mean: float,      # from e0 baseline M3 mean (t=0 anchor)
+    ref_t0_mean: float,      # e0 baseline M3 mean
     ref_tinf_mean: float = 0.090,
 ) -> None:
-    """Figure 3 (E2): delta_i mean + nested quantile bands over T (Mixed)."""
+    """Fig 3: M3 mean + nested quantile bands over depth (Mixed)."""
     t_vals = df["t"].tolist()
     xs = list(range(len(t_vals)))
     mean = df["M3_mean"].values

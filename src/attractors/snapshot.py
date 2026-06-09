@@ -1,15 +1,5 @@
-"""The single E o D fixed-point iteration, with depth snapshots and optional
-convergence diagnostics.
-
-z_{t+1} = E(D(z_t)) is iterated once; callers pick what to read out:
-  - snapshots at requested depths (finite t and/or float('inf')),
-  - a ConvergenceStats summary (set return_stats=True).
-
-Convergence is detected per sample (||z_{t+1} - z_t||^2 < tol) but never freezes
-a sample: the update is applied to the whole batch every step; `converged` only
-governs when the loop may stop. This is the one place the dynamics live —
-compute_attractors() in iteration.py is a thin wrapper over the inf-only call.
-"""
+"""The E∘D iteration — 
+Convergence is per-sample, but the update runs on the whole batch; """
 from dataclasses import dataclass, field
 
 import torch
@@ -24,9 +14,7 @@ class ConvergenceStats:
     n_converged: int
     mean_iters: float
     max_iters: int
-    # Per-iteration mean L2 norm ||z_{t+1} - z_t||_2 across all samples.
-    # Populated only when track_residuals=True; empty list otherwise.
-    residuals: list[float] = field(default_factory=list)
+    residuals: list[float] = field(default_factory=list)  # mean ||Δz|| per step
 
     def __str__(self):
         pct = 100 * self.n_converged / self.n_total
@@ -42,24 +30,14 @@ def iterate_with_snapshots(
     decoder: nn.Module,
     z0: torch.Tensor,
     depths: list[DepthLike],
-    tol: float = 1e-6,
-    max_iter: int = 3000,
+    tol: float,
+    max_iter: int,
     return_stats: bool = False,
     track_residuals: bool = False,
 ):
-    """
-    Iterate z_{t+1} = E(D(z_t)) and return snapshots at each requested depth.
-
-    Finite t: snapshot at exactly t iterations. float('inf'): iterate until
-    per-sample convergence (||z_{t+1} - z_t||^2 < tol) or max_iter.
-    Snapshots are CPU tensors of shape (z0.shape[0], k). Depth 0 is z0.
-
-    return_stats: also return a ConvergenceStats (requires float('inf') in
-    depths so the convergence loop runs). track_residuals: record the mean L2
-    residual per iteration into the stats.
-
-    Returns the snapshots dict, or (snapshots, stats) when return_stats=True.
-    """
+    """Iterate z_{t+1} = E(D(z_t)), snapshot at each depth (CPU). Finite t:
+    exactly t steps; inf: to convergence (< tol) or max_iter.
+    Returns snapshots, or (snapshots, stats) when return_stats (needs inf)."""
     encoder.eval()
     decoder.eval()
 

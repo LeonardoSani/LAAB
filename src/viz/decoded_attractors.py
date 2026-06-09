@@ -9,21 +9,13 @@ from pathlib import Path
 @torch.no_grad()
 def plot_decoded_attractors(
     decoder: nn.Module,
-    attractors: torch.Tensor,   # (N, k) attractor latent vectors
-    X_a: torch.Tensor,          # (N, 1, 28, 28) source images
+    attractors: torch.Tensor,   # (N, k)
+    X_a: torch.Tensor,          # (N, 1, 28, 28) sources
     save_path: Path,
     n: int = 64,
     device: torch.device = torch.device("cpu"),
 ) -> None:
-    """
-    Plot decoded attractors alongside their source images.
-
-    Top row block: original X_a samples.
-    Bottom row block: D_s(attractor_i) for same indices.
-
-    A memorization regime shows near-identical decoded images regardless of input.
-    Healthy dynamics show diverse, digit-like reconstructions that differ from source.
-    """
+    """Decoded attractors (bottom) vs sources (top); memorization check."""
     n = min(n, attractors.shape[0])
     cols = min(16, n)
     rows_per_block = math.ceil(n / cols)
@@ -31,12 +23,12 @@ def plot_decoded_attractors(
     decoder.eval()
     decoder.to(device)
     z = attractors[:n].to(device)
-    decoded = decoder(z).cpu().clamp(0, 1)  # (n, 1, 28, 28)
+    decoded = decoder(z).cpu().clamp(0, 1)
 
-    src = X_a[:n].clamp(0, 1)  # (n, 1, 28, 28)
+    src = X_a[:n].clamp(0, 1)
 
-    # Total figure: two blocks (source / decoded), each rows_per_block rows
-    total_rows = rows_per_block * 2 + 1  # +1 for gap label row
+    # two blocks (source / decoded) + a gap label row
+    total_rows = rows_per_block * 2 + 1
     fig, axes = plt.subplots(total_rows, cols, figsize=(cols * 0.9, total_rows * 0.9))
     for ax in axes.ravel():
         ax.axis("off")
@@ -50,7 +42,6 @@ def plot_decoded_attractors(
     _place(0, src)
     _place(rows_per_block + 1, decoded)
 
-    # Labels
     fig.text(0.01, 1 - (rows_per_block / 2) / total_rows, "Source $X_a$",
              va="center", fontsize=9, fontweight="bold")
     fig.text(0.01, (rows_per_block / 2) / total_rows, r"$D_s(\phi_s^\infty)$",

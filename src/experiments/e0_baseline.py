@@ -1,8 +1,4 @@
-"""E0 baseline: relative representations agree across encoders at t=0.
-
-Outputs: e0_baseline.csv (M1/M2 mean+std pooled over pairs) and e0_m3_pooled.pt
-(pooled M3 for the fig1 KDE). Acceptance: M2 mean < 0.02.
-"""
+"""E0: reps agree across seeds at t=0. -> e0_baseline.csv, e0_m3_pooled.pt."""
 import csv
 
 import torch
@@ -18,7 +14,7 @@ class E0Baseline(Experiment):
         self._ensure_results_dir()
         print(f"Seeds: {self.seeds} | Pairs: {len(self.pairs)} | Device: {self.device}")
 
-        reps = {s: self.base_rep(s) for s in self.seeds}   # Base rep B_s (t=0)
+        reps = {s: self.base_rep(s) for s in self.seeds}
 
         m1_vals, m2_vals, m3_parts = [], [], []
         for s, sp in self.pairs:

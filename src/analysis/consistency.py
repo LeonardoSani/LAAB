@@ -1,10 +1,5 @@
-"""Analysis built on the per-anchor badness mu_i: is the per-anchor ordering a
-reliable signal, and how does it split by digit class?
-
-Operates on a single-depth badness slice of shape (N, n_pairs): row i = anchor
-i, column p = per_pair_badness for seed-pair p (i.e. the t=inf slice of the
-badness cube).
-"""
+"""Per-anchor badness ordering: reliability and digit-class split.
+Operates on a (N, n_pairs) badness slice."""
 import numpy as np
 from scipy.stats import pearsonr, spearmanr
 
@@ -13,14 +8,8 @@ from src.metrics import anchor_badness
 
 def split_half_reliability(slice_: np.ndarray, n_repeats: int = 500,
                            seed: int = 0) -> dict:
-    """Reliability of mu_i = mean_p per_pair_badness. Per-pair rankings are
-    noisy, so repeatedly split the pairs into two disjoint halves, recompute
-    mu_i on each, and correlate; Spearman-Brown lifts the half-set correlation
-    to the reliability of mu_i from ALL pairs.
-
-    (N, n_pairs) -> dict(pearson_half_mean, pearson_half_std,
-                         spearman_half_mean, spearman_brown_full).
-    """
+    """Split-half reliability of mu_i: split pairs, correlate halves,
+    Spearman-Brown to full-set reliability."""
     _, n_pairs = slice_.shape
     half = n_pairs // 2
     rng = np.random.default_rng(seed)
@@ -41,8 +30,7 @@ def split_half_reliability(slice_: np.ndarray, n_repeats: int = 500,
 
 
 def disjoint_half_means(slice_: np.ndarray, seed: int = 0) -> tuple[np.ndarray, np.ndarray]:
-    """One deterministic disjoint split of the pairs, for the scatter plot.
-    (N, n_pairs) -> (mu_half_a (N,), mu_half_b (N,))."""
+    """One disjoint pair split for the scatter -> (mu_a, mu_b)."""
     _, n_pairs = slice_.shape
     half = n_pairs // 2
     perm = np.random.default_rng(seed).permutation(n_pairs)
@@ -52,9 +40,7 @@ def disjoint_half_means(slice_: np.ndarray, seed: int = 0) -> tuple[np.ndarray, 
 def class_tail_counts(mu: np.ndarray, labels: np.ndarray,
                       tails=(("10", 0.10), ("20", 0.20)),
                       n_classes: int = 10) -> list[dict]:
-    """Digit-class composition of the good/bad badness tails. Ranks anchors by
-    mu (ascending = good first), takes the cumulative best/worst fractions, and
-    counts per class. Returns rows: {class, n_class, good10, good20, bad10, bad20}."""
+    """Digit-class composition of the best/worst mu tails (10%/20%)."""
     N = len(mu)
     order = np.argsort(mu)
     sets = {}
