@@ -5,7 +5,7 @@
 
 Independently trained autoencoders give cross-seed–reproducible *relative representations* at the base, but this alignment is progressively lost as the latent self-map is iterated toward its attractors.
 
-📄 **Paper:** _link to be added_
+📄 **Report Long version:** _link to be added_
 
 ## Repository 
 core modules:
