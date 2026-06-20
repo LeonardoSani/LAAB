@@ -5,7 +5,7 @@
 
 Independently trained autoencoders give cross-seed–reproducible *relative representations* at the base, but this alignment is progressively lost as the latent self-map is iterated toward its attractors.
 
-📄 **Report Long version:** _link to be added_
+📄 **Draft:** [Do Latent Vector Fields Align?.pdf](docs/Do%20Latent%20Vector%20Fields%20Align.pdf) to read details about the current state of the research.
 
 ## Repository 
 core modules:
